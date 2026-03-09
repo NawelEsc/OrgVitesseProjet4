@@ -1,0 +1,67 @@
+public with sharing class OpportunityProductsController {
+
+    // Wrapper pour structurer les données envoyées au LWC
+    public class OpportunityProductWrapper {
+        @AuraEnabled public String productName;
+        @AuraEnabled public String sku;
+        @AuraEnabled public Decimal quantity;
+        @AuraEnabled public Decimal unitPrice;
+        @AuraEnabled public Decimal totalPrice;
+        @AuraEnabled public Decimal quantityInStock;
+
+        public OpportunityProductWrapper(
+            String productName,
+            String sku,
+            Decimal quantity,
+            Decimal unitPrice,
+            Decimal totalPrice,
+            Decimal quantityInStock
+        ) {
+            this.productName = productName;
+            this.sku = sku;
+            this.quantity = quantity;
+            this.unitPrice = unitPrice;
+            this.totalPrice = totalPrice;
+            this.quantityInStock = quantityInStock;
+        }
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<OpportunityProductWrapper> getOpportunityProducts(Id opportunityId) {
+        List<OpportunityProductWrapper> results = new List<OpportunityProductWrapper>();
+
+        if (opportunityId == null) {
+            return results;
+        }
+
+        List<OpportunityLineItem> oliList = [
+            SELECT 
+                Quantity,
+                UnitPrice,
+                TotalPrice,
+                PricebookEntry.Product2.Name,
+                PricebookEntry.Product2.StockKeepingUnit,
+                PricebookEntry.Product2.QuantityInStock__c
+            FROM OpportunityLineItem
+            WHERE OpportunityId = :opportunityId
+        ];
+
+        for (OpportunityLineItem oli : oliList) {
+            String pName = (oli.PricebookEntry != null && oli.PricebookEntry.Product2 != null) ? oli.PricebookEntry.Product2.Name : null;
+            String sku = (oli.PricebookEntry != null && oli.PricebookEntry.Product2 != null) ? oli.PricebookEntry.Product2.StockKeepingUnit : null;
+            Decimal qtyInStock = (oli.PricebookEntry != null && oli.PricebookEntry.Product2 != null) ? oli.PricebookEntry.Product2.QuantityInStock__c : null;
+
+            results.add(new OpportunityProductWrapper(
+                pName,
+                sku,
+                oli.Quantity,
+                oli.UnitPrice,
+                oli.TotalPrice,
+                qtyInStock
+            ));
+        }
+
+        return results;
+    }
+
+}
