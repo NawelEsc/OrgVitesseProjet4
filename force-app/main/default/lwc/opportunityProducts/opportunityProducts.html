@@ -1,3 +1,21 @@
 <template>
-    
+    <lightning-card title="Produits de l'Opportunité">
+        <div class="slds-m-around_medium">
+
+            <!-- Zone où la liste des produits sera affichée -->
+            <template if:true={products}>
+                <template for:each={products} for:item="prod">
+                    <p key={prod.Id}>
+                        {prod.Name} – {prod.Quantity} × {prod.UnitPrice} €
+                    </p>
+                </template>
+            </template>
+
+            <!-- Message si aucun produit -->
+            <template if:false={products}>
+                <p>Aucun produit associé pour le moment.</p>
+            </template>
+
+        </div>
+    </lightning-card>
 </template>
