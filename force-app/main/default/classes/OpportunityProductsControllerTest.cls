@@ -1,73 +1,78 @@
-@IsTest
-public with sharing class OpportunityProductsControllerTest {
+@isTest
+private class OpportunityProductsControllerTest {
 
-    @IsTest
+    /**
+     * Vérifie que getOpportunityProducts retourne correctement
+     * les informations des OpportunityLineItem sous forme de wrapper.
+     */
+    @isTest
     static void testGetOpportunityProducts() {
 
-        // 1) Récupération du Pricebook standard
-        Pricebook2 pb = [
-            SELECT Id, IsActive
-            FROM Pricebook2
-            WHERE IsStandard = true
-            LIMIT 1
-        ];
+        // Récupération du Pricebook standard pour les tests
+        Id stdPriceBookId = Test.getStandardPricebookId();
 
-        // ⚠️ Activation obligatoire dans les tests Apex
-        pb.IsActive = true;
-        update pb;
+        // Création d’un compte pour lier l’Opportunity
+        Account acc = new Account(Name = 'Test Account');
+        insert acc;
 
-        // 2) Création du produit
-        Product2 p = new Product2(
+        // Création d’un produit actif avec les champs utilisés dans le controller
+        Product2 prod = new Product2(
             Name = 'Produit Test',
-            StockKeepingUnit = 'SKU123',
+            StockKeepingUnit = 'SKU-123',
             QuantityInStock__c = 50,
             IsActive = true
         );
-        insert p;
+        insert prod;
 
-        // 3) Création du PricebookEntry
+        // Création d’un PricebookEntry actif lié au Pricebook standard
         PricebookEntry pbe = new PricebookEntry(
-            Product2Id = p.Id,
-            Pricebook2Id = pb.Id,
+            Product2Id = prod.Id,
+            Pricebook2Id = stdPriceBookId,
             UnitPrice = 100,
-            UseStandardPrice = false,
             IsActive = true
         );
         insert pbe;
 
-        // 4) Création de l’Opportunity
+        // Ligne envoyée par ton mentor, intégrée telle quelle
         Opportunity opp = new Opportunity(
-            Name = 'Opp Test',
-            StageName = 'Prospecting',
-            CloseDate = Date.today(),
-            Pricebook2Id = pb.Id
+            Name='test',
+            TotalOpportunityQuantity=10,
+            StageName='Hot',
+            CloseDate=System.today(),
+            Pricebook2Id=stdPriceBookId,
+            AccountId=acc.Id
         );
         insert opp;
 
-        // 5) Création de l’OpportunityLineItem
+        // Création d’un OpportunityLineItem lié à l’Opportunity
         OpportunityLineItem oli = new OpportunityLineItem(
             OpportunityId = opp.Id,
-            Quantity = 2,
-            UnitPrice = 100,
-            PricebookEntryId = pbe.Id
+            Quantity = 10,
+            PricebookEntryId = pbe.Id,
+            TotalPrice = 1000
         );
         insert oli;
 
-        // 6) Appel de la méthode Apex
-        Test.startTest();
+        // Appel de la méthode du controller
         List<OpportunityProductsController.OpportunityProductWrapper> results =
             OpportunityProductsController.getOpportunityProducts(opp.Id);
-        Test.stopTest();
 
-        // 7) Assertions
+        // Vérification : un seul produit doit être retourné
         System.assertEquals(1, results.size());
-        System.assertEquals('Produit Test', results[0].productName);
-        System.assertEquals('SKU123', results[0].sku);
-        System.assertEquals(2, results[0].quantity);
-        System.assertEquals(100, results[0].unitPrice);
-        System.assertEquals(50, results[0].quantityInStock);
+
+        // Vérification du contenu du wrapper
+        OpportunityProductsController.OpportunityProductWrapper w = results[0];
+
+        System.assertEquals('Produit Test', w.productName);
+        System.assertEquals('SKU-123', w.sku);
+        System.assertEquals(10, w.quantity);
+        System.assertEquals(100, w.unitPrice);
+        System.assertEquals(1000, w.totalPrice);
+        System.assertEquals(50, w.quantityInStock);
     }
 }
+
+
 
 
 
