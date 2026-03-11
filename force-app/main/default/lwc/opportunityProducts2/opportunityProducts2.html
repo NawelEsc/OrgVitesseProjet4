@@ -1,0 +1,24 @@
+<template>
+    <lightning-card title="Produits de l'Opportunité">
+        <div class="slds-m-around_medium">
+
+            <!-- Tableau si des produits existent -->
+            <template if:true={hasProducts}>
+                <lightning-datatable
+                    onrowaction={handleRowAction}
+                    key-field="sku"
+                    data={products}
+                    columns={columns}>
+                </lightning-datatable>
+            </template>
+
+            <!-- Message si aucun produit -->
+            <template if:false={hasProducts}>
+                <p class="slds-p-around_medium">
+                    Aucun produit associé pour le moment.
+                </p>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>
