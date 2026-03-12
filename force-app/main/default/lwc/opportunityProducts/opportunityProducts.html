@@ -2,23 +2,33 @@
     <lightning-card title="Produits de l'Opportunité">
         <div class="slds-m-around_medium">
 
+            <!-- Point 7 : Message d’erreur global -->
+            <template if:true={hasGlobalError}>
+                <div class="slds-text-color_error slds-p-bottom_small">
+                    Vous avez au moins une ligne avec une quantité supérieure au stock disponible.
+                </div>
+            </template>
+
             <!-- Tableau si des produits existent -->
             <template if:true={hasProducts}>
                 <lightning-datatable
-                    onrowaction={handleRowAction}
-                    key-field="sku"
+                    key-field="oliId"
                     data={products}
-                    columns={columns}>
+                    columns={columns}
+                    onrowaction={handleRowAction}>
                 </lightning-datatable>
             </template>
 
             <!-- Message si aucun produit -->
             <template if:false={hasProducts}>
-                <p class="slds-p-around_medium">
-                    Aucun produit associé pour le moment.
-                </p>
+                <div class="slds-p-around_medium slds-text-color_weak">
+                    Vous n'avez aucune ligne de produits pour le moment.<br/>
+                    1. Veuillez tout d'abord sélectionner un Catalogue (Pricebook)<br/>
+                    2. Sélectionnez ensuite les produits à ajouter.
+                </div>
             </template>
 
         </div>
     </lightning-card>
 </template>
+

@@ -3,12 +3,15 @@ import getOpportunityProducts from '@salesforce/apex/OpportunityProductsControll
 import USER_ID from '@salesforce/user/Id';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import PROFILE_NAME_FIELD from '@salesforce/schema/User.Profile.Name';
+import deleteOpportunityLineItem from '@salesforce/apex/OpportunityProductsController.deleteOpportunityLineItem';
+import { refreshApex } from '@salesforce/apex';
 
 export default class OpportunityProducts extends LightningElement {
     @api recordId;
     @track products;
     isAdmin = false;
 
+    // Profil utilisateur
     @wire(getRecord, { recordId: USER_ID, fields: [PROFILE_NAME_FIELD] })
     wiredUser({ data, error }) {
         if (data) {
@@ -20,16 +23,28 @@ export default class OpportunityProducts extends LightningElement {
         }
     }
 
+    wiredProductsResult;
+
+    // Récupération des produits
     @wire(getOpportunityProducts, { opportunityId: '$recordId' })
-    wiredProducts({ data, error }) {
+    wiredProducts(result) {
+        this.wiredProductsResult = result;
+        const { data, error } = result;
+
         if (data) {
-            this.products = data;
+            // Ajout du flag d’erreur pour le point 6
+            this.products = data.map(prod => ({
+                ...prod,
+                hasStockError: prod.quantityInStock < prod.quantity,
+                stockClass: prod.quantityInStock < prod.quantity ? 'slds-text-color_error' : ''
+            }));
         } else if (error) {
             console.error('Erreur Apex : ', error);
             this.products = [];
         }
     }
 
+    // Bouton Voir produit (admin)
     viewProductColumn = {
         type: 'button',
         typeAttributes: {
@@ -40,6 +55,7 @@ export default class OpportunityProducts extends LightningElement {
         }
     };
 
+    // Bouton Supprimer
     deleteColumn = {
         type: 'button-icon',
         typeAttributes: {
@@ -52,15 +68,25 @@ export default class OpportunityProducts extends LightningElement {
         label: 'Supprimer'
     };
 
+    // Colonnes demandées
     baseColumns = [
-        { label: 'Produit', fieldName: 'productName', type: 'text' },
-        { label: 'SKU', fieldName: 'sku', type: 'text' },
+        { label: 'Nom du produit', fieldName: 'productName', type: 'text' },
         { label: 'Quantité', fieldName: 'quantity', type: 'number' },
         { label: 'Prix unitaire', fieldName: 'unitPrice', type: 'currency' },
-        { label: 'Total', fieldName: 'totalPrice', type: 'currency' },
-        { label: 'Stock disponible', fieldName: 'quantityInStock', type: 'number' }
+        { label: 'Prix Total', fieldName: 'totalPrice', type: 'currency' },
+
+        // Point 6 : case rouge si stock insuffisant
+        {
+            label: 'Quantité en Stock',
+            fieldName: 'quantityInStock',
+            type: 'number',
+            cellAttributes: {
+                class: { fieldName: 'stockClass' }
+            }
+        }
     ];
 
+    // Colonnes finales selon profil
     get columns() {
         const cols = [...this.baseColumns];
         cols.push(this.deleteColumn);
@@ -70,10 +96,17 @@ export default class OpportunityProducts extends LightningElement {
         return cols;
     }
 
+    // Condition d’affichage du tableau
     get hasProducts() {
         return Array.isArray(this.products) && this.products.length > 0;
     }
 
+    // Point 7 : message d’erreur global
+    get hasGlobalError() {
+        return this.products && this.products.some(p => p.hasStockError);
+    }
+
+    // Gestion des actions
     handleRowAction(event) {
         const actionName = event.detail.action.name;
         const row = event.detail.row;
@@ -88,13 +121,22 @@ export default class OpportunityProducts extends LightningElement {
         }
     }
 
+    // Suppression réelle
     handleDelete(row) {
-        console.log('Suppression demandée pour : ', row);
+        deleteOpportunityLineItem({ oliId: row.oliId })
+            .then(() => {
+                return refreshApex(this.wiredProductsResult);
+            })
+            .catch(error => {
+                console.error('Erreur suppression : ', error);
+            });
     }
 
+    // Point 5 : Voir produit
     handleViewProduct(row) {
-        console.log('Voir produit : ', row);
+        window.location.href = `/lightning/r/Product2/${row.productId}/view`;
     }
 }
+
 
 
