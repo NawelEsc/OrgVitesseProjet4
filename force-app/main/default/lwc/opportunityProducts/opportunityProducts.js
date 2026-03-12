@@ -4,7 +4,7 @@ import USER_ID from '@salesforce/user/Id';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import PROFILE_NAME_FIELD from '@salesforce/schema/User.Profile.Name';
 
-export default class OpportunityProducts2 extends LightningElement {
+export default class OpportunityProducts extends LightningElement {
     @api recordId;
     @track products;
     isAdmin = false;

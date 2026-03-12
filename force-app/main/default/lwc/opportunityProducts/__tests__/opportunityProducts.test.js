@@ -1,5 +1,5 @@
 import { createElement } from '@lwc/engine-dom';
-import OpportunityProducts2 from 'c/opportunityProducts2';
+import OpportunityProducts from 'c/opportunityProducts';
 
 // Mock LDS getRecord
 jest.mock(
@@ -21,7 +21,7 @@ jest.mock(
     { virtual: true }
 );
 
-describe('c-opportunity-products2', () => {
+describe('c-opportunity-products', () => {
 
     afterEach(() => {
         while (document.body.firstChild) {
@@ -31,8 +31,8 @@ describe('c-opportunity-products2', () => {
     });
 
     it('renders the component', () => {
-        const element = createElement('c-opportunity-products2', {
-            is: OpportunityProducts2
+        const element = createElement('c-opportunity-products', {
+            is: OpportunityProducts
         });
         element.recordId = '006XXXXXXXXXXXX';
         document.body.appendChild(element);
@@ -41,8 +41,8 @@ describe('c-opportunity-products2', () => {
     });
 
     it('shows delete button for all users and view product button for admins', async () => {
-        const element = createElement('c-opportunity-products2', {
-            is: OpportunityProducts2
+        const element = createElement('c-opportunity-products', {
+            is: OpportunityProducts
         });
         element.recordId = '006XXXXXXXXXXXX';
         document.body.appendChild(element);
