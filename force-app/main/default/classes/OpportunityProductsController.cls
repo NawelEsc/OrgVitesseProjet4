@@ -33,18 +33,8 @@ public with sharing class OpportunityProductsController {
         if (opportunityId == null) {
             return results;
         }
-
-        List<OpportunityLineItem> oliList = [
-            SELECT 
-                Quantity,
-                UnitPrice,
-                TotalPrice,
-                PricebookEntry.Product2.Name,
-                PricebookEntry.Product2.StockKeepingUnit,
-                PricebookEntry.Product2.QuantityInStock__c
-            FROM OpportunityLineItem
-            WHERE OpportunityId = :opportunityId
-        ];
+        //Appel au selector
+         List<OpportunityLineItem> oliList = OpportunityProductSelector.getByOpportunityId(opportunityId);
 
         for (OpportunityLineItem oli : oliList) {
             String pName = (oli.PricebookEntry != null && oli.PricebookEntry.Product2 != null) ? oli.PricebookEntry.Product2.Name : null;
