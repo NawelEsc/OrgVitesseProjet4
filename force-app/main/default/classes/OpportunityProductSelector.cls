@@ -6,12 +6,14 @@ public with sharing class OpportunityProductSelector {
                    OpportunityId,
                    Quantity,
                    UnitPrice,
+                   TotalPrice,
                    PricebookEntry.Product2Id,
                    PricebookEntry.Product2.Name,
                    PricebookEntry.Product2.StockKeepingUnit,
                    PricebookEntry.Product2.QuantityInStock__c
-                 FROM OpportunityLineItem
+            FROM OpportunityLineItem
             WHERE OpportunityId = :opportunityId
         ];
     }
 }
+
