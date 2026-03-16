@@ -13,7 +13,7 @@ export default class OpportunityProducts extends LightningElement {
 
     // Profil utilisateur
     @wire(getRecord, { recordId: USER_ID, fields: [PROFILE_NAME_FIELD] })
-    wiredUser({ data, error }) {
+        wiredUser({ data, error }) {
         if (data) {
             const profileName = getFieldValue(data, PROFILE_NAME_FIELD);
             this.isAdmin = profileName === 'System Administrator';
@@ -27,9 +27,11 @@ export default class OpportunityProducts extends LightningElement {
 
     // Récupération des produits
     @wire(getOpportunityProducts, { opportunityId: '$recordId' })
-    wiredProducts(result) {
+        wiredProducts(result) {
+        console.log('RECORD ID:', this.recordId);
         this.wiredProductsResult = result;
         const { data, error } = result;
+
 
         if (data) {
             // Ajout du flag d’erreur pour le point 6
