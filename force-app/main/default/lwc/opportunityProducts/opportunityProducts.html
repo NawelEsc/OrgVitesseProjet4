@@ -1,11 +1,11 @@
 <template>
-    <lightning-card title="Produits de l'Opportunité">
+    <lightning-card title={label.OpportunityProducts_Title}>
         <div class="slds-m-around_medium">
 
-            <!-- Point 7 : Message d’erreur global -->
+            <!-- Message d’erreur global -->
             <template if:true={hasGlobalError}>
                 <div class="slds-text-color_error slds-p-bottom_small">
-                    Vous avez au moins une ligne avec une quantité supérieure au stock disponible.
+                    {label.OpportunityProducts_Global_Error}
                 </div>
             </template>
 
@@ -22,9 +22,9 @@
             <!-- Message si aucun produit -->
             <template if:false={hasProducts}>
                 <div class="slds-p-around_medium slds-text-color_weak">
-                    Vous n'avez aucune ligne de produits pour le moment.<br/>
-                    1. Veuillez tout d'abord sélectionner un Catalogue (Pricebook)<br/>
-                    2. Sélectionnez ensuite les produits à ajouter.
+                    {label.OpportunityProducts_NoLines}<br/>
+                    1. {label.OpportunityProducts_Select_Pricebook}<br/>
+                    2. {label.OpportunityProducts_Select_Products}
                 </div>
             </template>
 

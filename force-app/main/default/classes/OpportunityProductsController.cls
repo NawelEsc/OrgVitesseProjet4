@@ -11,33 +11,32 @@ public with sharing class OpportunityProductsController {
         @AuraEnabled public Id oliId;
         @AuraEnabled public Id productId;
 
-
         public OpportunityProductWrapper(
-        Id oliId,
-        Id productId,
-        String productName,
-        String sku,
-        Decimal quantity,
-        Decimal unitPrice,
-        Decimal totalPrice,
-        Decimal quantityInStock
-) {
-    this.oliId = oliId;
-    this.productId = productId;
-    this.productName = productName;
-    this.sku = sku;
-    this.quantity = quantity;
-    this.unitPrice = unitPrice;
-    this.totalPrice = totalPrice;
-    this.quantityInStock = quantityInStock;
-}
+            Id oliId,
+            Id productId,
+            String productName,
+            String sku,
+            Decimal quantity,
+            Decimal unitPrice,
+            Decimal totalPrice,
+            Decimal quantityInStock
+        ) {
+            this.oliId = oliId;
+            this.productId = productId;
+            this.productName = productName;
+            this.sku = sku;
+            this.quantity = quantity;
+            this.unitPrice = unitPrice;
+            this.totalPrice = totalPrice;
+            this.quantityInStock = quantityInStock;
+        }
     }
 
-     @AuraEnabled
+    @AuraEnabled
     public static void deleteOpportunityLineItem(Id oliId) {
-    delete [SELECT Id FROM OpportunityLineItem WHERE Id = :oliId];
-}
-   
+        delete [SELECT Id FROM OpportunityLineItem WHERE Id = :oliId];
+    }
+
     @AuraEnabled(cacheable=true)
     public static List<OpportunityProductWrapper> getOpportunityProducts(Id opportunityId) {
         List<OpportunityProductWrapper> results = new List<OpportunityProductWrapper>();
@@ -45,28 +44,35 @@ public with sharing class OpportunityProductsController {
         if (opportunityId == null) {
             return results;
         }
-        //Appel au selector
-         List<OpportunityLineItem> oliList = OpportunityProductSelector.getByOpportunityId(opportunityId);
+
+        // SELECT COMPLET — C’EST ICI QUE LE STOCK ÉTAIT MANQUANT
+        List<OpportunityLineItem> oliList = [
+            SELECT Id,
+                   Quantity,
+                   UnitPrice,
+                   TotalPrice,
+                   PricebookEntry.Product2Id,
+                   PricebookEntry.Product2.Name,
+                   PricebookEntry.Product2.StockKeepingUnit,
+                   PricebookEntry.Product2.QuantityInStock__c
+            FROM OpportunityLineItem
+            WHERE OpportunityId = :opportunityId
+        ];
 
         for (OpportunityLineItem oli : oliList) {
-            String pName = (oli.PricebookEntry != null && oli.PricebookEntry.Product2 != null) ? oli.PricebookEntry.Product2.Name : null;
-            String sku = (oli.PricebookEntry != null && oli.PricebookEntry.Product2 != null) ? oli.PricebookEntry.Product2.StockKeepingUnit : null;
-            Decimal qtyInStock = (oli.PricebookEntry != null && oli.PricebookEntry.Product2 != null) ? oli.PricebookEntry.Product2.QuantityInStock__c : null;
-
-        results.add(new OpportunityProductWrapper(
-            oli.Id,
-            oli.PricebookEntry.Product2Id,
-            pName,
-            sku,
-            oli.Quantity,
-            oli.UnitPrice,
-            oli.TotalPrice,
-            qtyInStock
-        ));
-
+            results.add(new OpportunityProductWrapper(
+                oli.Id,
+                oli.PricebookEntry.Product2Id,
+                oli.PricebookEntry.Product2.Name,
+                oli.PricebookEntry.Product2.StockKeepingUnit,
+                oli.Quantity,
+                oli.UnitPrice,
+                oli.TotalPrice,
+                oli.PricebookEntry.Product2.QuantityInStock__c
+            ));
         }
 
         return results;
     }
-
 }
+
