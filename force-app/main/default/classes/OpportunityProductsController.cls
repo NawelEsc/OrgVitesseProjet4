@@ -1,6 +1,5 @@
 public with sharing class OpportunityProductsController {
 
-    // Wrapper pour structurer les données envoyées au LWC
     public class OpportunityProductWrapper {
         @AuraEnabled public String productName;
         @AuraEnabled public String sku;
@@ -45,7 +44,6 @@ public with sharing class OpportunityProductsController {
             return results;
         }
 
-        // SELECT COMPLET — C’EST ICI QUE LE STOCK ÉTAIT MANQUANT
         List<OpportunityLineItem> oliList = [
             SELECT Id,
                    Quantity,
