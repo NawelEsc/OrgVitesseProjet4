@@ -1,21 +1,17 @@
 @isTest
 private class OpportunityProductsControllerTest {
 
-    /**
-     * Vérifie que getOpportunityProducts retourne correctement
-     * les informations des OpportunityLineItem sous forme de wrapper.
-     */
     @isTest
     static void testGetOpportunityProducts() {
 
-        // Récupération du Pricebook standard pour les tests
+        // Récupération du Pricebook standard
         Id stdPriceBookId = Test.getStandardPricebookId();
 
-        // Création d’un compte pour lier l’Opportunity
+        // Compte
         Account acc = new Account(Name = 'Test Account');
         insert acc;
 
-        // Création d’un produit actif avec les champs utilisés dans le controller
+        // Produit
         Product2 prod = new Product2(
             Name = 'Produit Test',
             StockKeepingUnit = 'SKU-123',
@@ -24,7 +20,7 @@ private class OpportunityProductsControllerTest {
         );
         insert prod;
 
-        // Création d’un PricebookEntry actif lié au Pricebook standard
+        // PricebookEntry
         PricebookEntry pbe = new PricebookEntry(
             Product2Id = prod.Id,
             Pricebook2Id = stdPriceBookId,
@@ -33,18 +29,18 @@ private class OpportunityProductsControllerTest {
         );
         insert pbe;
 
-        // Ligne envoyée par ton mentor, intégrée telle quelle
+        // Opportunity
         Opportunity opp = new Opportunity(
-            Name='test',
-            TotalOpportunityQuantity=10,
-            StageName='Hot',
-            CloseDate=System.today(),
-            Pricebook2Id=stdPriceBookId,
-            AccountId=acc.Id
+            Name = 'Test Opp',
+            StageName = 'Hot',
+            CloseDate = System.today(),
+            TotalOpportunityQuantity = 10,
+            Pricebook2Id = stdPriceBookId,
+            AccountId = acc.Id
         );
         insert opp;
 
-        // Création d’un OpportunityLineItem lié à l’Opportunity
+        // OpportunityLineItem
         OpportunityLineItem oli = new OpportunityLineItem(
             OpportunityId = opp.Id,
             Quantity = 10,
@@ -53,14 +49,17 @@ private class OpportunityProductsControllerTest {
         );
         insert oli;
 
-        // Appel de la méthode du controller
+        // 🔥 OBLIGATOIRE pour exécuter les méthodes cacheable
+        Test.startTest();
+
         List<OpportunityProductsController.OpportunityProductWrapper> results =
             OpportunityProductsController.getOpportunityProducts(opp.Id);
 
-        // Vérification : un seul produit doit être retourné
+        Test.stopTest();
+
+        // Vérifications
         System.assertEquals(1, results.size());
 
-        // Vérification du contenu du wrapper
         OpportunityProductsController.OpportunityProductWrapper w = results[0];
 
         System.assertEquals('Produit Test', w.productName);
@@ -71,6 +70,7 @@ private class OpportunityProductsControllerTest {
         System.assertEquals(50, w.quantityInStock);
     }
 }
+
 
 
 

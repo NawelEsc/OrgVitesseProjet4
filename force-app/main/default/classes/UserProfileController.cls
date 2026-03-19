@@ -1,16 +1,13 @@
 public with sharing class UserProfileController {
 
-    @AuraEnabled
+    /**
+     * Retourne le nom du profil de l’utilisateur connecté.
+     */
+    @AuraEnabled(cacheable=true)
     public static String getUserProfileName() {
-        User u = [
-            SELECT Id, Profile.Name
-            FROM User
-            WHERE Id = :UserInfo.getUserId()
-            LIMIT 1
-        ];
-
-        return u.Profile.Name;
+        return OpportunityProductSelector.getUserProfileName(UserInfo.getUserId());
     }
 }
+
 
 

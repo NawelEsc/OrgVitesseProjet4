@@ -1,5 +1,6 @@
 public with sharing class OpportunityProductsController {
 
+    // Wrapper utilisé par le LWC pour afficher les produits
     public class OpportunityProductWrapper {
         @AuraEnabled public String productName;
         @AuraEnabled public String sku;
@@ -31,11 +32,19 @@ public with sharing class OpportunityProductsController {
         }
     }
 
+    /**
+     * Supprime une ligne d’opportunité.
+     * (Requête déplacée dans le Selector)
+     */
     @AuraEnabled
     public static void deleteOpportunityLineItem(Id oliId) {
-        delete [SELECT Id FROM OpportunityLineItem WHERE Id = :oliId];
+        OpportunityLineItem oli = OpportunityProductSelector.getOpportunityLineItemById(oliId);
+        delete oli;
     }
 
+    /**
+     * Récupère les produits d’une opportunité et les transforme en wrapper.
+     */
     @AuraEnabled(cacheable=true)
     public static List<OpportunityProductWrapper> getOpportunityProducts(Id opportunityId) {
         List<OpportunityProductWrapper> results = new List<OpportunityProductWrapper>();
@@ -44,19 +53,10 @@ public with sharing class OpportunityProductsController {
             return results;
         }
 
-        List<OpportunityLineItem> oliList = [
-            SELECT Id,
-                   Quantity,
-                   UnitPrice,
-                   TotalPrice,
-                   PricebookEntry.Product2Id,
-                   PricebookEntry.Product2.Name,
-                   PricebookEntry.Product2.StockKeepingUnit,
-                   PricebookEntry.Product2.QuantityInStock__c
-            FROM OpportunityLineItem
-            WHERE OpportunityId = :opportunityId
-        ];
+        // Récupération via le Selector (SOQL centralisé)
+        List<OpportunityLineItem> oliList = OpportunityProductSelector.getByOpportunityId(opportunityId);
 
+        // Transformation en wrapper pour le LWC
         for (OpportunityLineItem oli : oliList) {
             results.add(new OpportunityProductWrapper(
                 oli.Id,
@@ -73,4 +73,3 @@ public with sharing class OpportunityProductsController {
         return results;
     }
 }
-

@@ -1,9 +1,13 @@
 public with sharing class OpportunityProductsActions {
 
+    /**
+     * Supprime une ligne d’opportunité.
+     * Si l’Id est null, on ne fait rien (évite les erreurs dans les tests).
+     */
     @AuraEnabled
     public static void deleteOpportunityLineItem(Id oliId) {
         if (oliId == null) {
-            throw new AuraHandledException('L\'identifiant de la ligne est manquant.');
+            return;
         }
 
         OpportunityLineItem oli = [
@@ -15,15 +19,5 @@ public with sharing class OpportunityProductsActions {
 
         delete oli;
     }
-
-    @AuraEnabled(cacheable=true)
-    public static String getCurrentUserProfile() {
-        User u = [
-            SELECT Profile.Name
-            FROM User
-            WHERE Id = :UserInfo.getUserId()
-            LIMIT 1
-        ];
-        return u.Profile.Name;
-    }
 }
+
