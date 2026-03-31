@@ -1,0 +1,19 @@
+{
+  "folders": [
+    {
+      "path": "/Users/nawelescuderberrah/Projet4/Cr-ez-une-organisation-Salesforce-pour-votre-entreprise/salesforce_projet_4"
+    }
+  ],
+  "settings": {
+    "eslint.workingDirectories": [
+      "/Users/nawelescuderberrah/Projet4/Cr-ez-une-organisation-Salesforce-pour-votre-entreprise/salesforce_projet_4"
+    ],
+    "eslint.validate": [
+      "javascript",
+      "typescript"
+    ],
+    "eslint.options": {
+      "overrideConfigFile": "/Users/nawelescuderberrah/Projet4/Cr-ez-une-organisation-Salesforce-pour-votre-entreprise/salesforce_projet_4/.eslintrc.json"
+    }
+  }
+}

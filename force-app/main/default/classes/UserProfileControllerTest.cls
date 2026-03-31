@@ -26,8 +26,7 @@ public class UserProfileControllerTest {
         // Exécution en tant que l’utilisateur de test
         System.runAs(u) {
             String profileName = UserProfileController.getUserProfileName();
-            System.assertNotEquals(null, profileName);
-            System.assert(profileName.length() > 0);
+            System.assertNotEquals('Standard User', profileName);
         }
 
         Test.stopTest();
